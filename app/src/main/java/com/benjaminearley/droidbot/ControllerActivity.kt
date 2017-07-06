@@ -25,10 +25,10 @@ open class ControllerActivity : Activity() {
         if (event.source != InputDevice.SOURCE_UNKNOWN &&
             InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK &&
             event.action == MotionEvent.ACTION_MOVE) {
-            joysticksSubject.onNext(Joysticks(Pair(
+            joysticksSubject.onNext(Joysticks(
                 JoystickPosition(event.getAxisValue(MotionEvent.AXIS_X), event.getAxisValue(MotionEvent.AXIS_Y)),
                 JoystickPosition(event.getAxisValue(MotionEvent.AXIS_Z), event.getAxisValue(MotionEvent.AXIS_RZ))
-            )))
+            ))
         }
 
         return super.dispatchGenericMotionEvent(event)
@@ -39,5 +39,5 @@ open class ControllerActivity : Activity() {
     }
 }
 
-data class Joysticks(val joysticks: Pair<JoystickPosition, JoystickPosition>)
+data class Joysticks(val leftStick: JoystickPosition, val rightStick: JoystickPosition)
 data class JoystickPosition(val x: Float, val y: Float)

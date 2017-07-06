@@ -1,7 +1,7 @@
 package com.benjaminearley.droidbot
 
 import android.os.Bundle
-import android.os.SystemClock
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
 
@@ -11,12 +11,23 @@ class MainActivity : ControllerActivity() {
         super.onCreate(savedInstanceState)
         PwnBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
         PwnBoard.setPwmFreq(50F)
-        SystemClock.sleep(2000)
-        while (true) {
-            PwnBoard.spinLeft()
-            SystemClock.sleep(2000)
-            PwnBoard.spinRight()
-            SystemClock.sleep(2000)
+
+        getJoysticks()
+            .sample(20, TimeUnit.MILLISECONDS)
+            .subscribe({ (LStick, RStick) ->
+                PwnBoard.setPwm(0, 0, stickToPwm(LStick.x))
+            })
+    }
+
+    fun stickToPwm(x: Float): Short {
+        val x = x.clipToUnit
+
+        return if (x > 0) {
+            ((AdafruitPCA9685.SERVO_MAX - AdafruitPCA9685.SERVO_MIDPOINT) * x + AdafruitPCA9685.SERVO_MIDPOINT).toShort()
+        } else if (x < 0) {
+            ((AdafruitPCA9685.SERVO_MIDPOINT - AdafruitPCA9685.SERVO_MIN) * x + AdafruitPCA9685.SERVO_MIN).toShort()
+        } else {
+            AdafruitPCA9685.SERVO_MIDPOINT.toShort()
         }
     }
 
