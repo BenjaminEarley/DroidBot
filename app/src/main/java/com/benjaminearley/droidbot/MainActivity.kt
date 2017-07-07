@@ -13,21 +13,31 @@ class MainActivity : ControllerActivity() {
         PwnBoard.setPwmFreq(50F)
 
         getJoysticks()
+            // sample to Pwn Frequency
             .sample(20, TimeUnit.MILLISECONDS)
-            .subscribe({ (LStick, RStick) ->
-                PwnBoard.setPwm(0, 0, stickToPwm(LStick.x))
+            // convert dead zone
+            .map { (LStick, RStick) ->
+                val lStick = Vector2(LStick.x, -LStick.y)
+                val lateral = if (lStick dot lStick >= deadZone2) lStick else Vector2(0.0f, 0.0f)
+                val yaw = if (Math.abs(RStick.x) >= deadZone) -RStick.x else 0.0f
+                Pair(lateral, yaw)
+            }
+            .subscribe({ (lateral, yaw) ->
+                getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
+                    PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
+                }
             })
     }
 
-    fun stickToPwm(x: Float): Short {
-        val x = x.clipToUnit
+    fun unitToPwm(x: Float): Short {
+        val pwm = x.clipToUnit
 
-        return if (x > 0) {
-            ((AdafruitPCA9685.SERVO_MAX - AdafruitPCA9685.SERVO_MIDPOINT) * x + AdafruitPCA9685.SERVO_MIDPOINT).toShort()
-        } else if (x < 0) {
-            ((AdafruitPCA9685.SERVO_MIDPOINT - AdafruitPCA9685.SERVO_MIN) * x + AdafruitPCA9685.SERVO_MIN).toShort()
+        return if (pwm > 0) {
+            ((Servo.MAX - Servo.MIDPOINT) * pwm + Servo.MIDPOINT).toShort()
+        } else if (pwm < 0) {
+            (Servo.MIDPOINT + (Servo.MIDPOINT - Servo.MIN) * pwm).toShort()
         } else {
-            AdafruitPCA9685.SERVO_MIDPOINT.toShort()
+            Servo.MIDPOINT
         }
     }
 
@@ -37,8 +47,10 @@ class MainActivity : ControllerActivity() {
     }
 
     companion object {
-        val TAG = "DROIDBOT"
-        val I2C_DEVICE_NAME = "I2C1"
-    }
+        const private val TAG = "DROIDBOT"
+        const private val I2C_DEVICE_NAME = "I2C1"
 
+        private val deadZone = 0.2f
+        private val deadZone2 = deadZone * deadZone
+    }
 }

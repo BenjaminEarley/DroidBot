@@ -75,29 +75,31 @@ class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
     }
 
     companion object {
-        private val TAG = "PCA9685"
+        const private val TAG = "PCA9685"
 
         // Registers/etc:
-        private val PCA9685_ADDRESS = 0x40
-        private val MODE1 = 0x00
-        private val MODE2 = 0x01
-        private val PRESCALE = 0xFE
-        private val LED0_ON_L = 0x06
-        private val LED0_ON_H = 0x07
-        private val LED0_OFF_L = 0x08
-        private val LED0_OFF_H = 0x09
-        private val ALL_LED_ON_L = 0xFA
-        private val ALL_LED_ON_H = 0xFB
-        private val ALL_LED_OFF_L = 0xFC
-        private val ALL_LED_OFF_H = 0xFD
+        const private val PCA9685_ADDRESS = 0x40
+        const private val MODE1 = 0x00
+        const private val MODE2 = 0x01
+        const private val PRESCALE = 0xFE
+        const private val LED0_ON_L = 0x06
+        const private val LED0_ON_H = 0x07
+        const private val LED0_OFF_L = 0x08
+        const private val LED0_OFF_H = 0x09
+        const private val ALL_LED_ON_L = 0xFA
+        const private val ALL_LED_ON_H = 0xFB
+        const private val ALL_LED_OFF_L = 0xFC
+        const private val ALL_LED_OFF_H = 0xFD
 
         // Bits:
-        private val ALLCALL = 0x01
-        private val SLEEP = 0x10
-        private val OUTDRV = 0x04
-
-        val SERVO_MIN: Short = 205  // Min pulse length out of 4096
-        val SERVO_MIDPOINT: Short = 307  // Mid point
-        val SERVO_MAX: Short = 410  // Max pulse length out of 4096
+        const private val ALLCALL = 0x01
+        const private val SLEEP = 0x10
+        const private val OUTDRV = 0x04
     }
+}
+
+object Servo {
+    const val MIN: Short = 205  // Min pulse length out of 4096
+    const val MIDPOINT: Short = 307  // Mid point
+    const val MAX: Short = 410  // Max pulse length out of 4096
 }

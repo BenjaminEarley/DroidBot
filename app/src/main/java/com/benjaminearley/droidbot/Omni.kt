@@ -1,6 +1,10 @@
 package com.benjaminearley.droidbot
 
-import java.lang.Math.*
+import java.lang.Math.PI
+import java.lang.Math.abs
+import java.lang.Math.cos
+import java.lang.Math.sin
+import java.lang.Math.sqrt
 
 val Tau = PI.toFloat() * 2.0f
 val numWheels = 3
@@ -13,7 +17,7 @@ val Float.clipToUnit: Float get() = if (this < -1.0f) -1.0f else if (this > 1.0f
 
 data class Vector2(val x: Float, val y: Float) {
     fun divide(s: Float): Vector2 = Vector2(x / s, y / s)
-    infix fun dot(v: Vector2): Float = x * v.x + y * v.y
+    infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
 
     val clipToUnit: Vector2
         get() = dot(this).let { lengthSquared ->
