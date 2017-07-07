@@ -20,9 +20,8 @@ open class ControllerActivity : Activity() {
     fun getJoysticks(): Observable<Joysticks> = joysticksSubject
 
     override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
-        if (event == null) return super.dispatchGenericMotionEvent(event)
-
-        if (event.source != InputDevice.SOURCE_UNKNOWN &&
+        if (event != null &&
+            event.source != InputDevice.SOURCE_UNKNOWN &&
             InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK &&
             event.action == MotionEvent.ACTION_MOVE) {
             joysticksSubject.onNext(Joysticks(
@@ -30,7 +29,6 @@ open class ControllerActivity : Activity() {
                 JoystickPosition(event.getAxisValue(MotionEvent.AXIS_Z), event.getAxisValue(MotionEvent.AXIS_RZ))
             ))
         }
-
         return super.dispatchGenericMotionEvent(event)
     }
 
