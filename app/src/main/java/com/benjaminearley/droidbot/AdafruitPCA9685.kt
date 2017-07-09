@@ -26,6 +26,7 @@ class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
 
     fun softwareReset() {
         writeBuffer(byteArrayOf(0x06)) // SWRST
+        SystemClock.sleep(5)
     }
 
     fun close() {

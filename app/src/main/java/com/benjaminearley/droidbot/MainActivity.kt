@@ -1,17 +1,21 @@
 package com.benjaminearley.droidbot
 
 import android.os.Bundle
-import android.util.Log
+import com.benjaminearley.droidbot.Buttons.BACK
+import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
 
     lateinit var PwnBoard: AdafruitPCA9685
+    lateinit var disposables: CompositeDisposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PwnBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
         PwnBoard.setPwmFreq(50F)
+
+        disposables = CompositeDisposable()
 
         getJoysticks()
             .sample(20, TimeUnit.MILLISECONDS)
@@ -21,12 +25,22 @@ class MainActivity : ControllerActivity() {
                 val yaw = if (Math.abs(RStick.x) >= deadZone) -RStick.x else 0.0f
                 Pair(lateral, yaw)
             }
+            .distinctUntilChanged()
             .subscribe({ (lateral, yaw) ->
-                Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
-            })
+            }) pipe disposables::add
+
+        getButtons()
+            .subscribe({ Buttons ->
+                when (Buttons) {
+                    BACK -> {
+                        PwnBoard.softwareReset()
+                        PwnBoard.setPwmFreq(50F)
+                    }
+                }
+            }) pipe disposables::add
     }
 
     fun unitToPwm(x: Float): Short {
@@ -44,6 +58,7 @@ class MainActivity : ControllerActivity() {
     override fun onDestroy() {
         super.onDestroy()
         PwnBoard.close()
+        disposables.clear()
     }
 
     companion object {
