@@ -1,6 +1,7 @@
 package com.benjaminearley.droidbot
 
 import android.os.Bundle
+import android.util.Log
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
@@ -13,9 +14,7 @@ class MainActivity : ControllerActivity() {
         PwnBoard.setPwmFreq(50F)
 
         getJoysticks()
-            // sample to Pwn Frequency
             .sample(20, TimeUnit.MILLISECONDS)
-            // convert dead zone
             .map { (LStick, RStick) ->
                 val lStick = Vector2(LStick.x, -LStick.y)
                 val lateral = if (lStick dot lStick >= deadZone2) lStick else Vector2(0.0f, 0.0f)
@@ -23,6 +22,7 @@ class MainActivity : ControllerActivity() {
                 Pair(lateral, yaw)
             }
             .subscribe({ (lateral, yaw) ->
+                Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
@@ -33,11 +33,11 @@ class MainActivity : ControllerActivity() {
         val pwm = x.clipToUnit
 
         return if (pwm > 0) {
-            ((Servo.MAX - Servo.MIDPOINT) * pwm + Servo.MIDPOINT).toShort()
+            ((Mg360Servo.MAX - Mg360Servo.MIDPOINT) * pwm + Mg360Servo.MIDPOINT).toShort()
         } else if (pwm < 0) {
-            (Servo.MIDPOINT + (Servo.MIDPOINT - Servo.MIN) * pwm).toShort()
+            (Mg360Servo.MIDPOINT + (Mg360Servo.MIDPOINT - Mg360Servo.MIN) * pwm).toShort()
         } else {
-            Servo.MIDPOINT
+            Mg360Servo.MIDPOINT
         }
     }
 
@@ -50,7 +50,14 @@ class MainActivity : ControllerActivity() {
         const private val TAG = "DROIDBOT"
         const private val I2C_DEVICE_NAME = "I2C1"
 
-        private val deadZone = 0.2f
+        private val deadZone = 0.18f
         private val deadZone2 = deadZone * deadZone
+
     }
+}
+
+object Mg360Servo {
+    const val MIN: Short = 205  // Min pulse length out of 4096
+    const val MIDPOINT: Short = 307  // Mid point
+    const val MAX: Short = 410  // Max pulse length out of 4096
 }

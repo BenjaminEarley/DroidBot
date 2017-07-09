@@ -97,9 +97,3 @@ class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
         const private val OUTDRV = 0x04
     }
 }
-
-object Servo {
-    const val MIN: Short = 205  // Min pulse length out of 4096
-    const val MIDPOINT: Short = 307  // Mid point
-    const val MAX: Short = 410  // Max pulse length out of 4096
-}

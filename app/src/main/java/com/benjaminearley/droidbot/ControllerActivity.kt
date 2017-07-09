@@ -3,7 +3,6 @@ package com.benjaminearley.droidbot
 import android.app.Activity
 import android.os.Bundle
 import android.view.InputDevice
-import android.view.KeyEvent
 import android.view.MotionEvent
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -24,16 +23,54 @@ open class ControllerActivity : Activity() {
             event.source != InputDevice.SOURCE_UNKNOWN &&
             InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK &&
             event.action == MotionEvent.ACTION_MOVE) {
-            joysticksSubject.onNext(Joysticks(
-                JoystickPosition(event.getAxisValue(MotionEvent.AXIS_X), event.getAxisValue(MotionEvent.AXIS_Y)),
-                JoystickPosition(event.getAxisValue(MotionEvent.AXIS_Z), event.getAxisValue(MotionEvent.AXIS_RZ))
-            ))
+
+            val historySize = event.historySize
+
+            for (i in 0..historySize - 1) {
+                processJoystickInput(event, i)
+            }
+
+            processJoystickInput(event)
+            return true
         }
         return super.dispatchGenericMotionEvent(event)
     }
 
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        return super.dispatchKeyEvent(event)
+    private fun processJoystickInput(event: MotionEvent,
+                                     historyPos: Int? = null) {
+
+        val mInputDevice = event.device
+
+
+        joysticksSubject.onNext(
+            Joysticks(
+                JoystickPosition(
+                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_X, historyPos),
+                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_Y, historyPos)),
+                JoystickPosition(
+                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_RX, historyPos),
+                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_RY, historyPos))))
+    }
+
+    private fun getCenteredAxis(event: MotionEvent,
+                                device: InputDevice, axis: Int, historyPos: Int?): Float {
+        val range = device.getMotionRange(axis, event.source)
+
+        if (range != null) {
+            val flat = range.flat
+
+            val value = historyPos?.let {
+                event.getHistoricalAxisValue(axis, it)
+            } ?: run {
+                event.getAxisValue(axis)
+            }
+
+            if (Math.abs(value) > flat) {
+                return value
+            }
+        }
+
+        return 0f
     }
 }
 
