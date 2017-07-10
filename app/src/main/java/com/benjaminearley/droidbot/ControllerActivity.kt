@@ -42,9 +42,7 @@ open class ControllerActivity : Activity() {
 
     private fun processJoystickInput(event: MotionEvent,
                                      historyPos: Int? = null) {
-
         val mInputDevice = event.device
-
 
         joysticksSubject.onNext(
             Joysticks(
@@ -57,25 +55,16 @@ open class ControllerActivity : Activity() {
     }
 
     private fun getCenteredAxis(event: MotionEvent,
-                                device: InputDevice, axis: Int, historyPos: Int?): Float {
-        val range = device.getMotionRange(axis, event.source)
-
-        if (range != null) {
-            val flat = range.flat
-
-            val value = historyPos?.let {
+                                device: InputDevice, axis: Int, historyPos: Int?) =
+        device.getMotionRange(axis, event.source)?.let {
+            historyPos?.let {
                 event.getHistoricalAxisValue(axis, it)
             } ?: run {
                 event.getAxisValue(axis)
             }
-
-            if (Math.abs(value) > flat) {
-                return value
-            }
+        } ?: run {
+            0f
         }
-
-        return 0f
-    }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (event.repeatCount == 0 && event.action == KeyEvent.ACTION_DOWN) {
