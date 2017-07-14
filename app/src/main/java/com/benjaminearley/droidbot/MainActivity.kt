@@ -2,7 +2,9 @@ package com.benjaminearley.droidbot
 
 import android.os.Bundle
 import com.benjaminearley.droidbot.Buttons.BACK
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
@@ -17,8 +19,10 @@ class MainActivity : ControllerActivity() {
 
         disposables = CompositeDisposable()
 
-        getJoysticks()
-            .sample(20, TimeUnit.MILLISECONDS)
+        val sampler = Observable.interval(20, TimeUnit.MILLISECONDS)
+
+        val joystickInput = getJoysticks()
+            .sample(sampler)
             .map { (LStick, RStick) ->
                 val lStick = Vector2(LStick.x, -LStick.y)
                 val lateral = if (lStick dot lStick >= deadZone2) lStick else Vector2(0.0f, 0.0f)
@@ -26,6 +30,13 @@ class MainActivity : ControllerActivity() {
                 Pair(lateral, yaw)
             }
             .distinctUntilChanged()
+
+        Observable
+            .combineLatest(
+                sampler,
+                joystickInput,
+                BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y }
+            )
             .subscribe({ (lateral, yaw) ->
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
