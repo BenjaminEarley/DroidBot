@@ -31,17 +31,15 @@ class MainActivity : ControllerActivity() {
             }
             .distinctUntilChanged()
 
-        Observable
-            .combineLatest(
-                sampler,
-                joystickInput,
-                BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y }
-            )
-            .subscribe({ (lateral, yaw) ->
+        sampler
+            .withLatestFrom(joystickInput,
+                BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y })
+            .subscribe { (lateral, yaw) ->
+                //Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
-            }) pipe disposables::add
+            } pipe disposables::add
 
         getButtons()
             .subscribe({ Buttons ->
