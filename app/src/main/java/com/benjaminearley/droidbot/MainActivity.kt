@@ -65,7 +65,7 @@ class MainActivity : ControllerActivity() {
         const private val TAG = "DROIDBOT"
         const private val I2C_DEVICE_NAME = "I2C1"
 
-        private val deadZone = 0.18f
+        private val deadZone = 0.2f
         private val deadZone2 = deadZone * deadZone
 
     }
