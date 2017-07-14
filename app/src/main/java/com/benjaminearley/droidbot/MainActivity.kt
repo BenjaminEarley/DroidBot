@@ -15,11 +15,11 @@ class MainActivity : ControllerActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         PwnBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
-        PwnBoard.setPwmFreq(50F)
+        PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
 
         disposables = CompositeDisposable()
 
-        val sampler = Observable.interval(20, TimeUnit.MILLISECONDS)
+        val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
             .sample(sampler)
@@ -76,8 +76,8 @@ class MainActivity : ControllerActivity() {
         const private val TAG = "DROIDBOT"
         const private val I2C_DEVICE_NAME = "I2C1"
 
-        private val deadZone = 0.2f
-        private val deadZone2 = deadZone * deadZone
+        const private val deadZone = 0.2f
+        const private val deadZone2 = deadZone * deadZone
 
     }
 }
@@ -86,4 +86,6 @@ object Mg360Servo {
     const val MIN: Short = 205  // Min pulse length out of 4096
     const val MIDPOINT: Short = 307  // Mid point
     const val MAX: Short = 410  // Max pulse length out of 4096
+    const val FREQUENCY_IN_HERTZ: Float = 50F
+    const val FREQUENCY_IN_MS: Long = ((1 / FREQUENCY_IN_HERTZ) * 1000).toLong()
 }
