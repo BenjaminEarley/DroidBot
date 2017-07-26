@@ -22,7 +22,6 @@ class MainActivity : ControllerActivity() {
         val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
-            .sample(sampler)
             .map { (LStick, RStick) ->
                 val lStick = Vector2(LStick.x, -LStick.y)
                 val lateral = if (lStick dot lStick >= deadZone2) lStick else Vector2(0.0f, 0.0f)
@@ -46,7 +45,7 @@ class MainActivity : ControllerActivity() {
                 when (Buttons) {
                     BACK -> {
                         PwnBoard.softwareReset()
-                        PwnBoard.setPwmFreq(50F)
+                        PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
                     }
                 }
             }) pipe disposables::add
