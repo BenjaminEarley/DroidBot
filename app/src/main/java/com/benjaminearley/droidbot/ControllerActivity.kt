@@ -30,7 +30,7 @@ open class ControllerActivity : Activity() {
 
             val historySize = event.historySize
 
-            for (i in 0..historySize - 1) {
+            for (i in 0 until historySize) {
                 processJoystickInput(event, i)
             }
 
