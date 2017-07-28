@@ -19,9 +19,10 @@ open class ControllerActivity : Activity() {
         buttonsSubject = PublishSubject.create()
     }
 
-    fun getJoysticks(): Observable<Joysticks> = joysticksSubject.map { (l, r) ->
-        Joysticks(l.removeDeadZone, r.removeDeadZone)
-    }
+    fun getJoysticks(): Observable<Joysticks> = joysticksSubject
+        .map { (l, r) ->
+            Joysticks(l.removeDeadZone.clipToUnit, r.removeDeadZone.clipToUnit)
+        }
         .distinctUntilChanged()
 
     fun getButtons(): Observable<Buttons> = buttonsSubject

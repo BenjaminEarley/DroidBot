@@ -23,7 +23,7 @@ class MainActivity : ControllerActivity() {
         val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
-            .map { (lStick, rStick) -> Pair(lStick, -rStick.x) }
+            .map { (lStick, rStick) -> Pair(Vector2(lStick.x, -lStick.y), -rStick.x) }
 
         sampler
             .withLatestFrom(joystickInput,
@@ -75,9 +75,9 @@ class MainActivity : ControllerActivity() {
 }
 
 object Mg360Servo {
-    const val MIN: Short = 205  // Min pulse length out of 4096
-    const val MIDPOINT: Short = 307  // Mid point
-    const val MAX: Short = 410  // Max pulse length out of 4096
+    const val MIN: Short = 220  // Min pulse length out of 4096
+    const val MIDPOINT: Short = 310  // Mid point
+    const val MAX: Short = 400  // Max pulse length out of 4096
     const val FREQUENCY_IN_HERTZ: Float = 50F
     const val FREQUENCY_IN_MS: Long = (1000 / FREQUENCY_IN_HERTZ).toLong()
 }
