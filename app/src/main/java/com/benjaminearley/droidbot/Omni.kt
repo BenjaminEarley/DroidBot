@@ -16,6 +16,8 @@ val zUnit = Vector3(0.0f, 0.0f, 1.0f)
 val Float.clipToUnit: Float get() = if (this < -1.0f) -1.0f else if (this > 1.0f) 1.0f else this
 
 data class Vector2(val x: Float, val y: Float) {
+    operator fun plus(v: Vector2): Vector2 = Vector2(x + v.x, y + v.y)
+    fun scale(s: Float): Vector2 = Vector2(x * s, y * s)
     fun divide(s: Float): Vector2 = Vector2(x / s, y / s)
     infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
 

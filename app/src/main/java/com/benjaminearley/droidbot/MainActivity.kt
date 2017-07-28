@@ -1,6 +1,7 @@
 package com.benjaminearley.droidbot
 
 import android.os.Bundle
+import android.util.Log
 import com.benjaminearley.droidbot.Buttons.BACK
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -22,20 +23,16 @@ class MainActivity : ControllerActivity() {
         val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
-            .map { (LStick, RStick) ->
-                val lStick = Vector2(LStick.x, -LStick.y)
-                val lateral = if (lStick dot lStick >= deadZone2) lStick else Vector2(0.0f, 0.0f)
-                val yaw = if (Math.abs(RStick.x) >= deadZone) -RStick.x else 0.0f
-                Pair(lateral, yaw)
-            }
-            .distinctUntilChanged()
+            .map { (lStick, rStick) -> Pair(lStick, -rStick.x) }
 
         sampler
             .withLatestFrom(joystickInput,
                 BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y })
             .subscribe { (lateral, yaw) ->
-                //Log.e(TAG, "$lateral $yaw")
+                Log.i(TAG, "$lateral $yaw")
+
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
+                    Log.i(TAG, "$i: ${unitToPwm(speed)}")
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
             } pipe disposables::add
@@ -46,6 +43,8 @@ class MainActivity : ControllerActivity() {
                     BACK -> {
                         PwnBoard.softwareReset()
                         PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
+                    }
+                    else -> {
                     }
                 }
             }) pipe disposables::add
@@ -72,10 +71,6 @@ class MainActivity : ControllerActivity() {
     companion object {
         const private val TAG = "DROIDBOT"
         const private val I2C_DEVICE_NAME = "I2C1"
-
-        const private val deadZone = 0.2f
-        const private val deadZone2 = deadZone * deadZone
-
     }
 }
 
@@ -84,5 +79,5 @@ object Mg360Servo {
     const val MIDPOINT: Short = 307  // Mid point
     const val MAX: Short = 410  // Max pulse length out of 4096
     const val FREQUENCY_IN_HERTZ: Float = 50F
-    const val FREQUENCY_IN_MS: Long = ((1 / FREQUENCY_IN_HERTZ) * 1000).toLong()
+    const val FREQUENCY_IN_MS: Long = (1000 / FREQUENCY_IN_HERTZ).toLong()
 }

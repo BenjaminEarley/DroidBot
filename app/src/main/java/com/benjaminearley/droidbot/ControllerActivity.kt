@@ -19,7 +19,11 @@ open class ControllerActivity : Activity() {
         buttonsSubject = PublishSubject.create()
     }
 
-    fun getJoysticks(): Observable<Joysticks> = joysticksSubject
+    fun getJoysticks(): Observable<Joysticks> = joysticksSubject.map { (l, r) ->
+        Joysticks(l.removeDeadZone, r.removeDeadZone)
+    }
+        .distinctUntilChanged()
+
     fun getButtons(): Observable<Buttons> = buttonsSubject
 
     override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
@@ -82,8 +86,24 @@ open class ControllerActivity : Activity() {
 }
 
 data class Joysticks(val leftStick: JoystickPosition, val rightStick: JoystickPosition)
-data class JoystickPosition(val x: Float, val y: Float)
+typealias JoystickPosition = Vector2
+
+val JoystickPosition.removeDeadZone: JoystickPosition get() {
+    val squaredLength = this dot this
+
+    return if (squaredLength >= deadZoneRadiusSquared) {
+        (this.scale(-deadZoneRadius / squaredLength.sqrt) + this).scale(deadZoneRadiusScale)
+    } else {
+        JoystickPosition(0.0f, 0.0f)
+    }
+}
+
+private val deadZoneRadius = 0.2f
+private val deadZoneRadiusSquared = deadZoneRadius * deadZoneRadius
+private val deadZoneRadiusScale = 1.0f / (1.0f - deadZoneRadius)
 
 enum class Buttons {
     X, Y, A, B, LB, RB, BACK, START
 }
+
+val Float.sqrt: Float get() = Math.sqrt(toDouble()).toFloat()
