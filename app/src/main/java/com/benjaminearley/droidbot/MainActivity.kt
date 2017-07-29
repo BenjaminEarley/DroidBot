@@ -81,3 +81,5 @@ object Mg360Servo {
     const val FREQUENCY_IN_HERTZ: Float = 50F
     const val FREQUENCY_IN_MS: Long = (1000 / FREQUENCY_IN_HERTZ).toLong()
 }
+
+val Float.clipToUnit: Float get() = if (this < -1.0f) -1.0f else if (this > 1.0f) 1.0f else this

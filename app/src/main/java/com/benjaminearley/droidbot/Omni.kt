@@ -13,8 +13,6 @@ val xUnit = Vector3(1.0f, 0.0f, 0.0f)
 val yUnit = Vector3(0.0f, 1.0f, 0.0f)
 val zUnit = Vector3(0.0f, 0.0f, 1.0f)
 
-val Float.clipToUnit: Float get() = if (this < -1.0f) -1.0f else if (this > 1.0f) 1.0f else this
-
 data class Vector2(val x: Float, val y: Float) {
     operator fun plus(v: Vector2): Vector2 = Vector2(x + v.x, y + v.y)
     fun scale(s: Float): Vector2 = Vector2(x * s, y * s)
@@ -76,6 +74,11 @@ fun combineSpeeds(lateral: Speeds, rotational: Speeds): Speeds =
 fun scaleToWithinMaxSpeed(speeds: Speeds): Speeds =
     speeds.map(::abs).max()!!.let { max -> if (max > 1.0) speeds.map { it / max } else speeds }
 
+val maxSum = 2.0f
+
+fun scaleToWithinMaxSum(speeds: Speeds): Speeds =
+    speeds.map(::abs).sum().let { sum -> if (sum > maxSum) speeds.map { it * (maxSum / sum) } else speeds }
+
 // Magnitude of direction should not exceed 1.0
 // direction x axis is pointed in the direction of the first wheel.
 // direction y axis is pointed such that the z axis is pointed upward in a right handed coordinate system.
@@ -85,7 +88,13 @@ fun scaleToWithinMaxSpeed(speeds: Speeds): Speeds =
 
 fun getSpeeds(direction: Vector2, turnDirection: Float): Speeds =
     direction.clipToUnit.let { (xDir, yDir) ->
-        scaleToWithinMaxSpeed(combineSpeeds(
+        combineSpeeds(
             lateralSpeeds(wheels, xDir, yDir),
-            rotationalSpeeds(wheels, turnDirection.clipToUnit)))
+            rotationalSpeeds(wheels, turnDirection)
+        ) pipe
+            ::scaleToWithinMaxSpeed pipe
+
+            // Scale down the sum of all wheel speeds to ensure max power draw is not exceeded.
+
+            ::scaleToWithinMaxSum
     }
