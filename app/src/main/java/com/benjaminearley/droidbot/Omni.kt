@@ -74,7 +74,7 @@ fun combineSpeeds(lateral: Speeds, rotational: Speeds): Speeds =
 fun scaleToWithinMaxSpeed(speeds: Speeds): Speeds =
     speeds.map(::abs).max()!!.let { max -> if (max > 1.0) speeds.map { it / max } else speeds }
 
-val maxSum = 2.0f
+val maxSum = 1.25f
 
 fun scaleToWithinMaxSum(speeds: Speeds): Speeds =
     speeds.map(::abs).sum().let { sum -> if (sum > maxSum) speeds.map { it * (maxSum / sum) } else speeds }
