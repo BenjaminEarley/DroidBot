@@ -17,7 +17,7 @@ data class Vector2(val x: Float, val y: Float) {
     operator fun plus(v: Vector2): Vector2 = Vector2(x + v.x, y + v.y)
     fun scale(s: Float): Vector2 = Vector2(x * s, y * s)
     private fun divide(s: Float): Vector2 = Vector2(x / s, y / s)
-    private infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
+    infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
 
     val clipToUnit: Vector2
         get() = dot(this).let { lengthSquared ->
