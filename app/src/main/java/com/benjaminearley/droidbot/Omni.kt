@@ -16,8 +16,8 @@ val zUnit = Vector3(0.0f, 0.0f, 1.0f)
 data class Vector2(val x: Float, val y: Float) {
     operator fun plus(v: Vector2): Vector2 = Vector2(x + v.x, y + v.y)
     fun scale(s: Float): Vector2 = Vector2(x * s, y * s)
-    fun divide(s: Float): Vector2 = Vector2(x / s, y / s)
-    infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
+    private fun divide(s: Float): Vector2 = Vector2(x / s, y / s)
+    private infix fun dot(v: Vector2): Float = (x * v.x) + (y * v.y)
 
     val clipToUnit: Vector2
         get() = dot(this).let { lengthSquared ->
@@ -38,10 +38,10 @@ data class Vector3(val x: Float, val y: Float, val z: Float) {
     operator fun unaryMinus(): Vector3 = Vector3(-x, -y, -z)
 }
 
-data class Quaternion(val s: Float, val v: Vector3) {
-    val conjugate: Quaternion get() = Quaternion(s, -v)
+data class Quaternion(private val s: Float, private val v: Vector3) {
+    private val conjugate: Quaternion get() = Quaternion(s, -v)
 
-    infix fun mul(q: Quaternion): Quaternion = Quaternion(
+    private infix fun mul(q: Quaternion): Quaternion = Quaternion(
         s * q.s - (v dot q.v),
         Vector3(
             v.y * q.v.z - v.z * q.v.y + s * q.v.x + v.x * q.s,

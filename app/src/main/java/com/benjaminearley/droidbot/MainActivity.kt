@@ -1,7 +1,6 @@
 package com.benjaminearley.droidbot
 
 import android.os.Bundle
-import android.util.Log
 import com.benjaminearley.droidbot.Buttons.BACK
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -10,8 +9,8 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
 
-    lateinit var PwnBoard: AdafruitPCA9685
-    lateinit var disposables: CompositeDisposable
+    private lateinit var PwnBoard: AdafruitPCA9685
+    private lateinit var disposables: CompositeDisposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,10 +28,8 @@ class MainActivity : ControllerActivity() {
             .withLatestFrom(joystickInput,
                 BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y })
             .subscribe { (lateral, yaw) ->
-                Log.i(TAG, "$lateral $yaw")
-
+                //Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
-                    Log.i(TAG, "$i: ${unitToPwm(speed)}")
                     PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
             } pipe disposables::add
@@ -44,21 +41,18 @@ class MainActivity : ControllerActivity() {
                         PwnBoard.softwareReset()
                         PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
                     }
-                    else -> {
-                    }
+                    else -> Unit
                 }
             }) pipe disposables::add
     }
 
-    fun unitToPwm(x: Float): Short {
+    private fun unitToPwm(x: Float): Short {
         val pwm = x.clipToUnit
 
-        return if (pwm > 0) {
-            ((Mg360Servo.MAX - Mg360Servo.MIDPOINT) * pwm + Mg360Servo.MIDPOINT).toShort()
-        } else if (pwm < 0) {
-            (Mg360Servo.MIDPOINT + (Mg360Servo.MIDPOINT - Mg360Servo.MIN) * pwm).toShort()
-        } else {
-            Mg360Servo.MIDPOINT
+        return when {
+            pwm > 0 -> ((Mg360Servo.MAX - Mg360Servo.MIDPOINT) * pwm + Mg360Servo.MIDPOINT).toShort()
+            pwm < 0 -> (Mg360Servo.MIDPOINT + (Mg360Servo.MIDPOINT - Mg360Servo.MIN) * pwm).toShort()
+            else -> Mg360Servo.MIDPOINT
         }
     }
 
