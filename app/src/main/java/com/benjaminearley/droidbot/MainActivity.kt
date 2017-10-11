@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : ControllerActivity() {
 
-    private lateinit var PwnBoard: AdafruitPCA9685
+    private lateinit var PwmBoard: AdafruitPCA9685
     private lateinit var disposables: CompositeDisposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PwnBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
-        PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
+        PwmBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
+        PwmBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
 
         disposables = CompositeDisposable()
 
@@ -30,7 +30,7 @@ class MainActivity : ControllerActivity() {
             .subscribe { (lateral, yaw) ->
                 //Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
-                    PwnBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
+                    PwmBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
             } pipe disposables::add
 
@@ -38,8 +38,8 @@ class MainActivity : ControllerActivity() {
             .subscribe({ Buttons ->
                 when (Buttons) {
                     BACK -> {
-                        PwnBoard.softwareReset()
-                        PwnBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
+                        PwmBoard.softwareReset()
+                        PwmBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
                     }
                     else -> Unit
                 }
@@ -58,7 +58,7 @@ class MainActivity : ControllerActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        PwnBoard.close()
+        PwmBoard.close()
         disposables.clear()
     }
 
