@@ -1,6 +1,6 @@
-def versionMajor = 0
-def versionMinor = 1
-def versionPatch = 2
+def versionMajor = 1
+def versionMinor = 0
+def versionPatch = 0
 def versionBuild = 0
 
 apply plugin: 'com.android.application'
@@ -8,12 +8,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.0'
     defaultConfig {
         applicationId "com.benjaminearley.droidbot"
         minSdkVersion 24
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -48,5 +48,5 @@ dependencies {
     //noinspection GradleDynamicVersion
     compileOnly 'com.google.android.things:androidthings:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.4'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.5'
 }
