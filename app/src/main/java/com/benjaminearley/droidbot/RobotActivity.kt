@@ -7,7 +7,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import java.util.concurrent.TimeUnit
 
-class MainActivity : ControllerActivity() {
+class RobotActivity : ControllerActivity() {
 
     private lateinit var PwmBoard: AdafruitPCA9685
     private lateinit var disposables: CompositeDisposable
