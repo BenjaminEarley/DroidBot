@@ -47,16 +47,16 @@ open class ControllerActivity : Activity() {
 
     private fun processJoystickInput(event: MotionEvent,
                                      historyPos: Int? = null) {
-        val mInputDevice = event.device
+        val inputDevice = event.device
 
         joysticksSubject.onNext(
             Joysticks(
                 JoystickPosition(
-                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_X, historyPos),
-                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_Y, historyPos)),
+                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_X, historyPos),
+                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_Y, historyPos)),
                 JoystickPosition(
-                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_RX, historyPos),
-                    getCenteredAxis(event, mInputDevice, MotionEvent.AXIS_RY, historyPos))))
+                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_RX, historyPos),
+                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_RY, historyPos))))
     }
 
     private fun getCenteredAxis(event: MotionEvent,
@@ -86,8 +86,9 @@ open class ControllerActivity : Activity() {
     }
 }
 
-data class Joysticks(val leftStick: JoystickPosition, val rightStick: JoystickPosition)
 typealias JoystickPosition = Vector2
+
+data class Joysticks(val leftStick: JoystickPosition, val rightStick: JoystickPosition)
 
 val JoystickPosition.removeDeadZone: JoystickPosition get() {
     val squaredLength = this dot this

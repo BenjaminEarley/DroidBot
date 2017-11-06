@@ -10,17 +10,17 @@ import kotlin.experimental.or
 
 class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
 
-    private val mDevice: I2cDevice
+    private val device: I2cDevice
 
     init {
-        mDevice = PeripheralManagerService().openI2cDevice(I2C_DEVICE_NAME, PCA9685_ADDRESS)
+        device = PeripheralManagerService().openI2cDevice(I2C_DEVICE_NAME, PCA9685_ADDRESS)
         setAllPwm(0, 0)
-        mDevice.writeRegByte(MODE2, OUTDRV.toByte())
-        mDevice.writeRegByte(MODE1, ALLCALL.toByte())
+        device.writeRegByte(MODE2, OUTDRV.toByte())
+        device.writeRegByte(MODE1, ALLCALL.toByte())
         SystemClock.sleep(5) //wake up (reset sleep)
-        var mode1 = mDevice.readRegByte(MODE1)
+        var mode1 = device.readRegByte(MODE1)
         mode1 = mode1 and SLEEP.inv().toByte()
-        mDevice.writeRegByte(MODE1, mode1)
+        device.writeRegByte(MODE1, mode1)
         SystemClock.sleep(5)
     }
 
@@ -31,7 +31,7 @@ class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
 
     fun close() {
         try {
-            mDevice.close()
+            device.close()
         } catch (e: IOException) {
             Log.w(TAG, "Unable to close I2C device", e)
         }
@@ -46,32 +46,32 @@ class AdafruitPCA9685(I2C_DEVICE_NAME: String) {
         Log.i(TAG, "Estimated pre-scale: $preScaleVal")
         val preScale = Math.floor(preScaleVal + 0.5).toByte()
         Log.i(TAG, "Final pre-scale: $preScale")
-        val oldMode = mDevice.readRegByte(MODE1)
+        val oldMode = device.readRegByte(MODE1)
         val newMode = (oldMode and 0x7F) or 0x10 //sleep
-        mDevice.writeRegByte(MODE1, newMode) //go to sleep
-        mDevice.writeRegByte(PRESCALE, preScale)
-        mDevice.writeRegByte(MODE1, oldMode)
+        device.writeRegByte(MODE1, newMode) //go to sleep
+        device.writeRegByte(PRESCALE, preScale)
+        device.writeRegByte(MODE1, oldMode)
         SystemClock.sleep(5)
-        mDevice.writeRegByte(MODE1, oldMode or 0x80.toByte())
+        device.writeRegByte(MODE1, oldMode or 0x80.toByte())
     }
 
     fun setPwm(channel: Byte, on: Short, off: Short) {
-        mDevice.writeRegByte(LED0_ON_L + 4 * channel, (on and 0xFF).toByte())
-        mDevice.writeRegByte(LED0_ON_H + 4 * channel, (on.toInt() ushr 8).toByte())
-        mDevice.writeRegByte(LED0_OFF_L + 4 * channel, (off and 0xFF).toByte())
-        mDevice.writeRegByte(LED0_OFF_H + 4 * channel, (off.toInt() ushr 8).toByte())
+        device.writeRegByte(LED0_ON_L + 4 * channel, (on and 0xFF).toByte())
+        device.writeRegByte(LED0_ON_H + 4 * channel, (on.toInt() ushr 8).toByte())
+        device.writeRegByte(LED0_OFF_L + 4 * channel, (off and 0xFF).toByte())
+        device.writeRegByte(LED0_OFF_H + 4 * channel, (off.toInt() ushr 8).toByte())
     }
 
     private fun setAllPwm(on: Short, off: Short) {
-        mDevice.writeRegByte(ALL_LED_ON_L, (on and 0xFF).toByte())
-        mDevice.writeRegByte(ALL_LED_ON_H, (on.toInt() ushr 8).toByte())
-        mDevice.writeRegByte(ALL_LED_OFF_L, (off and 0xFF).toByte())
-        mDevice.writeRegByte(ALL_LED_OFF_H, (off.toInt() ushr 8).toByte())
+        device.writeRegByte(ALL_LED_ON_L, (on and 0xFF).toByte())
+        device.writeRegByte(ALL_LED_ON_H, (on.toInt() ushr 8).toByte())
+        device.writeRegByte(ALL_LED_OFF_L, (off and 0xFF).toByte())
+        device.writeRegByte(ALL_LED_OFF_H, (off.toInt() ushr 8).toByte())
     }
 
     @Throws(IOException::class)
     private fun writeBuffer(buffer: ByteArray) {
-        val count = mDevice.write(buffer, buffer.size)
+        val count = device.write(buffer, buffer.size)
         Log.d(TAG, "Wrote $count bytes over I2C.")
     }
 

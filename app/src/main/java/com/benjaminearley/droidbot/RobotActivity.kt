@@ -22,11 +22,11 @@ class RobotActivity : ControllerActivity() {
         val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
-            .map { (lStick, rStick) -> Pair(Vector2(lStick.x, -lStick.y), -rStick.x) }
+            .map { (lStick, rStick) -> Pair(JoystickPosition(lStick.x, -lStick.y), -rStick.x) }
 
         sampler
             .withLatestFrom(joystickInput,
-                BiFunction<Long, Pair<Vector2, Float>, Pair<Vector2, Float>> { _, y -> y })
+                BiFunction<Long, Pair<JoystickPosition, Float>, Pair<JoystickPosition, Float>> { _, y -> y })
             .subscribe { (lateral, yaw) ->
                 //Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
