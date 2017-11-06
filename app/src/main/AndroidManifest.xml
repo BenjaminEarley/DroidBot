@@ -8,7 +8,7 @@
         tools:ignore="GoogleAppIndexingWarning,MissingApplicationIcon">
         <uses-library android:name="com.google.android.things"/>
 
-        <activity android:name=".RobotActivity">
+        <activity android:name=".DroidbotActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
