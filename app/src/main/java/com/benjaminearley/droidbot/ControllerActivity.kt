@@ -30,7 +30,7 @@ open class ControllerActivity : Activity() {
     override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
         if (event != null &&
             event.source != InputDevice.SOURCE_UNKNOWN &&
-            InputDevice.SOURCE_JOYSTICK == InputDevice.SOURCE_JOYSTICK &&
+            (event.source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK &&
             event.action == MotionEvent.ACTION_MOVE) {
 
             val historySize = event.historySize
@@ -45,30 +45,22 @@ open class ControllerActivity : Activity() {
         return super.dispatchGenericMotionEvent(event)
     }
 
-    private fun processJoystickInput(event: MotionEvent,
-                                     historyPos: Int? = null) {
-        val inputDevice = event.device
-
+    private fun processJoystickInput(event: MotionEvent, historyPos: Int? = null) =
         joysticksSubject.onNext(
             Joysticks(
                 JoystickPosition(
-                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_X, historyPos),
-                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_Y, historyPos)),
+                    getAxisValue(event, MotionEvent.AXIS_X, historyPos),
+                    getAxisValue(event, MotionEvent.AXIS_Y, historyPos)),
                 JoystickPosition(
-                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_RX, historyPos),
-                    getCenteredAxis(event, inputDevice, MotionEvent.AXIS_RY, historyPos))))
-    }
+                    getAxisValue(event, MotionEvent.AXIS_RX, historyPos),
+                    getAxisValue(event, MotionEvent.AXIS_RY, historyPos))))
 
-    private fun getCenteredAxis(event: MotionEvent,
-                                device: InputDevice, axis: Int, historyPos: Int?) =
-        device.getMotionRange(axis, event.source)?.let {
-            historyPos?.let {
-                event.getHistoricalAxisValue(axis, it)
-            } ?: run {
-                event.getAxisValue(axis)
-            }
+
+    private fun getAxisValue(event: MotionEvent, axis: Int, historyPos: Int?): Float =
+        historyPos?.let {
+            event.getHistoricalAxisValue(axis, it)
         } ?: run {
-            0f
+            event.getAxisValue(axis)
         }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -90,15 +82,16 @@ typealias JoystickPosition = Vector2
 
 data class Joysticks(val leftStick: JoystickPosition, val rightStick: JoystickPosition)
 
-val JoystickPosition.removeDeadZone: JoystickPosition get() {
-    val squaredLength = this dot this
+val JoystickPosition.removeDeadZone: JoystickPosition
+    get() {
+        val squaredLength = this dot this
 
-    return if (squaredLength >= deadZoneRadiusSquared) {
-        (this.scale(-deadZoneRadius / squaredLength.sqrt) + this).scale(deadZoneRadiusScale)
-    } else {
-        JoystickPosition(0.0f, 0.0f)
+        return if (squaredLength >= deadZoneRadiusSquared) {
+            (this.scale(-deadZoneRadius / squaredLength.sqrt) + this).scale(deadZoneRadiusScale)
+        } else {
+            JoystickPosition(0.0f, 0.0f)
+        }
     }
-}
 
 private val deadZoneRadius = 0.2f
 private val deadZoneRadiusSquared = deadZoneRadius * deadZoneRadius

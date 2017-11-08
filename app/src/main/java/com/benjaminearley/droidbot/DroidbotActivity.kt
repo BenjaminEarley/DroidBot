@@ -9,16 +9,16 @@ import java.util.concurrent.TimeUnit
 
 class DroidbotActivity : ControllerActivity() {
 
-    private lateinit var PwmBoard: AdafruitPCA9685
+    private lateinit var pwmHat: AdafruitPCA9685
     private lateinit var disposables: CompositeDisposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PwmBoard = AdafruitPCA9685(I2C_DEVICE_NAME)
-        PwmBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
+        pwmHat = AdafruitPCA9685(I2C_DEVICE_NAME)
+        pwmHat.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
 
         disposables = CompositeDisposable()
-
+        
         val sampler = Observable.interval(Mg360Servo.FREQUENCY_IN_MS, TimeUnit.MILLISECONDS)
 
         val joystickInput = getJoysticks()
@@ -26,24 +26,23 @@ class DroidbotActivity : ControllerActivity() {
 
         sampler
             .withLatestFrom(joystickInput,
-                BiFunction<Long, Pair<JoystickPosition, Float>, Pair<JoystickPosition, Float>> { _, y -> y })
+                BiFunction<Long, Pair<JoystickPosition, Float>, Pair<JoystickPosition, Float>> { _, joysticks -> joysticks })
             .subscribe { (lateral, yaw) ->
-                //Log.e(TAG, "$lateral $yaw")
                 getSpeeds(lateral, yaw).forEachIndexed { i, speed ->
-                    PwmBoard.setPwm(i.toByte(), 0, unitToPwm(speed))
+                    pwmHat.setPwm(i.toByte(), 0, unitToPwm(speed))
                 }
-            } pipe disposables::add
+            }.let(disposables::add)
 
         getButtons()
             .subscribe({ Buttons ->
                 when (Buttons) {
                     BACK -> {
-                        PwmBoard.softwareReset()
-                        PwmBoard.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
+                        pwmHat.softwareReset()
+                        pwmHat.setPwmFreq(Mg360Servo.FREQUENCY_IN_HERTZ)
                     }
                     else -> Unit
                 }
-            }) pipe disposables::add
+            }).let(disposables::add)
     }
 
     private fun unitToPwm(x: Float): Short {
@@ -58,7 +57,7 @@ class DroidbotActivity : ControllerActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        PwmBoard.close()
+        pwmHat.close()
         disposables.clear()
     }
 
