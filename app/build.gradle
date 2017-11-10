@@ -9,7 +9,7 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.0'
+    buildToolsVersion '27.0.1'
     defaultConfig {
         applicationId "com.benjaminearley.droidbot"
         minSdkVersion 24
@@ -48,5 +48,5 @@ dependencies {
     //noinspection GradleDynamicVersion
     compileOnly 'com.google.android.things:androidthings:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.5'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
 }
