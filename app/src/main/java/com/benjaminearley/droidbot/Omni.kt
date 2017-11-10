@@ -6,7 +6,7 @@ import java.lang.Math.cos
 import java.lang.Math.sin
 import java.lang.Math.sqrt
 
-val Tau = PI.toFloat() * 2.0f
+val tau = PI.toFloat() * 2.0f
 val numWheels = 3
 
 val xUnit = Vector3(1.0f, 0.0f, 0.0f)
@@ -58,7 +58,7 @@ fun quaternionFromVector(axis: Vector3, r: Float): Quaternion = Quaternion(
 typealias Wheels = List<Vector3>
 
 val wheels: List<Vector3> = (0 until numWheels).map {
-    quaternionFromVector(zUnit, (it.toFloat() / numWheels.toFloat()) * Tau).rotate(xUnit)
+    quaternionFromVector(zUnit, (it.toFloat() / numWheels.toFloat()) * tau).rotate(xUnit)
 }
 
 typealias Speeds = List<Float>

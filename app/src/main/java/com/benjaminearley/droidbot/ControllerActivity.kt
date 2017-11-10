@@ -1,5 +1,6 @@
 package com.benjaminearley.droidbot
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.view.InputDevice
@@ -8,6 +9,7 @@ import android.view.MotionEvent
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 
+@SuppressLint("Registered")
 open class ControllerActivity : Activity() {
 
     private lateinit var joysticksSubject: PublishSubject<Joysticks>
